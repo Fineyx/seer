@@ -1,0 +1,15 @@
+{
+  "version": "2026.09.04",
+  "updatedAt": "2026-09-04",
+  "source": "星辉数据快照（可通过同步接口替换）",
+  "species": [
+    {"id":"001","name":"谱尼","type":"圣灵系 · 传说精灵","stats":{"hp":180,"attack":145,"defense":120,"spAttack":145,"spDefense":120,"speed":130}},
+    {"id":"002","name":"索伦森","type":"暗影系 · 传说精灵","stats":{"hp":170,"attack":150,"defense":115,"spAttack":155,"spDefense":115,"speed":125}},
+    {"id":"003","name":"混沌魔君索伦森","type":"混沌系 · 传说精灵","stats":{"hp":185,"attack":158,"defense":125,"spAttack":158,"spDefense":125,"speed":135}},
+    {"id":"004","name":"王之哈莫","type":"龙系 · 传说精灵","stats":{"hp":190,"attack":155,"defense":130,"spAttack":110,"spDefense":125,"speed":120}},
+    {"id":"005","name":"圣光灵神","type":"光系 · 传说精灵","stats":{"hp":175,"attack":135,"defense":120,"spAttack":150,"spDefense":130,"speed":128}},
+    {"id":"006","name":"幻境界皇","type":"次元系 · 传说精灵","stats":{"hp":178,"attack":142,"defense":118,"spAttack":152,"spDefense":122,"speed":140}},
+    {"id":"007","name":"天启帝君","type":"光次元系 · 传说精灵","stats":{"hp":182,"attack":150,"defense":128,"spAttack":145,"spDefense":128,"speed":132}},
+    {"id":"008","name":"魔钰","type":"混沌暗影系 · 稀有精灵","stats":{"hp":165,"attack":140,"defense":108,"spAttack":145,"spDefense":110,"speed":133}}
+  ]
+}
