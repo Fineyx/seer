@@ -26,6 +26,7 @@ const EFFECTS = {
 };let data=FALLBACK_DATA, currentSpecies;
 const $=id=>document.getElementById(id);
 function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+function renderSpeciesOptions(){ const q=($("speciesSearch")?.value||"").trim().toLowerCase(); const list=data.species.filter(s=>!q||s.name.toLowerCase().includes(q)||s.id.includes(q)); $("speciesSelect").innerHTML=list.map(s=>`<option value="${s.id}">${s.name} · ${s.type}</option>`).join(""); if(!list.some(s=>s.id===$("speciesSelect").value)&&list[0]) $("speciesSelect").value=list[0].id; }
 function renderSelects(){
   $("speciesSelect").innerHTML=data.species.map(s=>`<option value="${s.id}">${s.name} · ${s.type.split(" · ")[0]}</option>`).join("");
   $("natureSelect").innerHTML=NATURES.map((n,i)=>`<option value="${i}">${n.name}${n.up?`（${STAT_LABELS[n.up]}↑ ${STAT_LABELS[n.down]}↓）`:"（平衡）"}</option>`).join("");
@@ -33,7 +34,7 @@ function renderSelects(){
   $("soulmarkSelect").innerHTML=EFFECTS.soulmarks.map(e=>`<option value="${e.id}">${e.name}</option>`).join("");
   $("ivFields").innerHTML=STAT_KEYS.map(k=>`<div class="compact-field"><label for="iv-${k}">${STAT_LABELS[k]}</label><input id="iv-${k}" data-stat="${k}" data-kind="iv" type="number" min="0" max="31" value="31"></div>`).join("");
   $("evFields").innerHTML=STAT_KEYS.map(k=>`<div class="compact-field"><label for="ev-${k}">${STAT_LABELS[k]}</label><input id="ev-${k}" data-stat="${k}" data-kind="ev" type="number" min="0" max="252" step="4" value="0"></div>`).join("");
-  $("speciesSelect").addEventListener("change",calculate);$("natureSelect").addEventListener("change",calculate);$("titleSelect").addEventListener("change",calculate);$("soulmarkSelect").addEventListener("change",calculate);
+  $("speciesSearch").addEventListener("input",()=>{renderSpeciesOptions();calculate()});$("speciesSelect").addEventListener("change",calculate);$("natureSelect").addEventListener("change",calculate);$("titleSelect").addEventListener("change",calculate);$("soulmarkSelect").addEventListener("change",calculate);document.querySelectorAll("#teamBonus,#vipBonus,#gearBonus,#combatMode").forEach(i=>i.addEventListener("change",calculate));
   document.querySelectorAll("input").forEach(i=>i.addEventListener("input",calculate));
 }
 function selected(){return data.species.find(s=>s.id===$("speciesSelect").value)||data.species[0]}
@@ -42,9 +43,9 @@ function calculate(){
   currentSpecies=selected();const level=readNumber("levelInput",1,100);const nature=NATURES[Number($("natureSelect").value)]||NATURES[0];
   const iv=Object.fromEntries(STAT_KEYS.map(k=>[k,readNumber(`iv-${k}`,0,31)]));const ev=Object.fromEntries(STAT_KEYS.map(k=>[k,readNumber(`ev-${k}`,0,252)]));const evTotal=Object.values(ev).reduce((a,b)=>a+b,0);
   $("evTotal").textContent=evTotal;$("evMeterFill").style.width=`${Math.min(100,evTotal/510*100)}%`;$("validation").textContent=evTotal>510?"努力值总和超过 510，请调整培养方案。":"";
-  $("speciesName").textContent=currentSpecies.name;$("speciesType").textContent=currentSpecies.type;$("speciesId").textContent=`#${currentSpecies.id}`;$("speciesOrb").textContent=currentSpecies.name.slice(0,1);$("resultLevel").textContent=`LV.${level}`;
+  $("speciesName").textContent=currentSpecies.name;$("speciesType").textContent=currentSpecies.type;const image=$("speciesImage");image.src=`https://api.seerapi.com/v1/resource/${Number(currentSpecies.id)}.png`;image.onload=()=>image.parentElement.classList.add("has-image");image.onerror=()=>image.parentElement.classList.remove("has-image");$("speciesId").textContent=`#${currentSpecies.id}`;$("speciesOrb").textContent=currentSpecies.name.slice(0,1);$("resultLevel").textContent=`LV.${level}`;
   const result={};STAT_KEYS.forEach(k=>{const base=Math.floor((2*currentSpecies.stats[k]+iv[k]+ev[k]/4)*level/100);result[k]=k==="hp"?base+level+10:Math.floor((base+5)*((nature.up===k)?1.1:(nature.down===k)?.9:1));});
-  const title=EFFECTS.titles.find(e=>e.id===$("titleSelect").value)||EFFECTS.titles[0];const soulmark=EFFECTS.soulmarks.find(e=>e.id===$("soulmarkSelect").value)||EFFECTS.soulmarks[0];STAT_KEYS.forEach(k=>{result[k]=Math.floor((result[k]+(title.fixed[k]||0)+(soulmark.fixed[k]||0))*(1+(title.rate[k]||0)+(soulmark.rate[k]||0)))});const total=Object.values(result).reduce((a,b)=>a+b,0);$("totalStat").textContent=total;const pct=Math.min(100,total/900*100);$("ringValue").style.strokeDashoffset=107-(107*pct/100);$("ringPercent").textContent=`${Math.round(pct)}%`;
+  const title=EFFECTS.titles.find(e=>e.id===$("titleSelect").value)||EFFECTS.titles[0];const soulmark=EFFECTS.soulmarks.find(e=>e.id===$("soulmarkSelect").value)||EFFECTS.soulmarks[0];const team=$("teamBonus").checked?0.05:0;const vip=$("vipBonus").checked?0.10:0;const gear=$("gearBonus").checked?0.08:0;const pvp=$("combatMode").checked?0.03:0;STAT_KEYS.forEach(k=>{result[k]=Math.floor((result[k]+(title.fixed[k]||0)+(soulmark.fixed[k]||0))*(1+(title.rate[k]||0)+(soulmark.rate[k]||0)+team+vip+gear+pvp))});const total=Object.values(result).reduce((a,b)=>a+b,0);$("totalStat").textContent=total;const pct=Math.min(100,total/900*100);$("ringValue").style.strokeDashoffset=107-(107*pct/100);$("ringPercent").textContent=`${Math.round(pct)}%`;
   $("statList").innerHTML=STAT_KEYS.map(k=>{const pct=Math.min(100,result[k]/400*100);const natureMark=nature.up===k?" · 性格提升":nature.down===k?" · 性格降低":"";return `<div class="stat-row"><span class="stat-label">${STAT_LABELS[k]}</span><div class="stat-track"><div class="stat-fill" style="width:${pct}%"></div></div><span class="stat-value">${result[k]}</span><span class="stat-meta">种族值 ${currentSpecies.stats[k]} · IV ${iv[k]} · EV ${ev[k]}${natureMark}</span></div>`}).join("");
 }
 async function syncData(){
