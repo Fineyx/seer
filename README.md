@@ -1,6 +1,6 @@
 # 星辉计算台 · 赛尔号精灵能力值计算器
 
-一个可部署到网页、也可打包成 Android APK 的赛尔号精灵能力值计算器。
+一个可部署到网页端的赛尔号精灵能力值计算器。
 
 ## 本地运行
 
@@ -31,5 +31,5 @@ index.html        网页入口
 styles.css        界面样式
 app.js            计算与数据同步逻辑
 data/species.data 精灵数据
-android/          Android WebView 壳
+calculator-v2.js   网页计算与配置逻辑
 ```
